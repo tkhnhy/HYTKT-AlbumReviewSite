@@ -1,2 +1,2 @@
-# HYTKT---AlbumReviewSite
-A review site for albums akin to Discogs and others
+# HYTKT - AlbumReviewSite
+A review site for albums akin to Discogs and others.
