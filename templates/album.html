@@ -1,0 +1,13 @@
+<h2>{{ art_name }} - {{ alb_name }} </h2>
+<br>
+<p> Songs: </p>
+<br>
+{% for con in alb_con %}
+{{ con[0] }} - {{ con[1] }}
+<hr>
+{% endfor %}
+<br>
+<br>
+<br>
+<a href="/all">back</a>
+<a href="/">home</a>

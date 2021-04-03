@@ -1,0 +1,7 @@
+<h2> All albums </h2>
+<p>Total albums: {{ count }} </p>
+<hr>
+{% for album in albums %}
+<a href="/album/{{ album[0] }}">{{ album[1] }} - {{ album[2] }} [{{ album[3] }}]</a>
+<hr>
+{% endfor %}
