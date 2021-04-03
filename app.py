@@ -25,7 +25,19 @@ def list_genres():
 	result = db.session.execute("SELECT * FROM genres")
 	allgenres = result
 	return render_template("allgenres.html", gnrs = allgenres)
-	
+
+@app.route("/genre/add")
+def add_genre_site():
+	return render_template("newgenre.html")
+
+@app.route("/creategenre", methods=["POST"])
+def create_genre():
+	genre_name = request.form["genre_name"]
+	sql = "INSERT INTO genres (genre_name) VALUES (:genre_name)"
+	result = db.session.execute(sql, {"genre_name":genre_name})
+	db.session.commit()
+	return redirect("/genre")
+
 @app.route("/album/<int:id>")
 def album(id):
 	sql = "SELECT song_name, song_length_seconds FROM songs,albums WHERE albums.id = songs.album_id AND albums.id=:id ORDER BY songs.id;"
@@ -47,15 +59,37 @@ def album(id):
 	artistname = result.fetchone()[0]
 	
 	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list)
+
 @app.route("/genre/<int:id>")
 def genre_albums(id):
-	sql = "SELECT albums.id, album_name, artist_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id=:id;"
+	sql = "SELECT albums.id, album_name, artist_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id=:id AND genres.id=:id;"
 	result = db.session.execute(sql, {"id":id})
 	albs = result.fetchall()
-	sql = "SELECT COUNT(albums.id) FROM albums, genres WHERE genres.id =:id"
+	sql = "SELECT COUNT(albums.id) FROM albums, genres WHERE genres.id =:id AND albums.album_genre_id=:id"
 	result = db.session.execute(sql, {"id":id}) 
 	count = result.fetchone()[0]
 	sql = "SELECT genre_name FROM genres WHERE genres.id =:id"
 	result = db.session.execute(sql, {"id":id}) 
 	gname = result.fetchone()[0]
 	return render_template("genre.html", id=id, genrename=gname, count=count, albums=albs)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
