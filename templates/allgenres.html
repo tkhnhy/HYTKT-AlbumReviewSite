@@ -1,0 +1,9 @@
+<h2> All genres </h2>
+<br>
+<hr>
+{% for g in gnrs %}
+<a href="/genre/{{ g[0] }}">{{ g[1] }}</a>
+<hr>
+{% endfor %}
+<br>
+<a href="/">home</a>

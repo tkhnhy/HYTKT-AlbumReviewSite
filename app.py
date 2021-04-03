@@ -19,6 +19,12 @@ def all_list():
 	result = db.session.execute("SELECT albums.id, album_name, artist_name, genre_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id = genres.id;")
 	albs = result.fetchall()
 	return render_template("allalbums.html", count=count, albums=albs)
+
+@app.route("/genre")
+def list_genres():
+	result = db.session.execute("SELECT * FROM genres")
+	allgenres = result
+	return render_template("allgenres.html", gnrs = allgenres)
 	
 @app.route("/album/<int:id>")
 def album(id):
@@ -41,3 +47,15 @@ def album(id):
 	artistname = result.fetchone()[0]
 	
 	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list)
+@app.route("/genre/<int:id>")
+def genre_albums(id):
+	sql = "SELECT albums.id, album_name, artist_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id=:id;"
+	result = db.session.execute(sql, {"id":id})
+	albs = result.fetchall()
+	sql = "SELECT COUNT(albums.id) FROM albums, genres WHERE genres.id =:id"
+	result = db.session.execute(sql, {"id":id}) 
+	count = result.fetchone()[0]
+	sql = "SELECT genre_name FROM genres WHERE genres.id =:id"
+	result = db.session.execute(sql, {"id":id}) 
+	gname = result.fetchone()[0]
+	return render_template("genre.html", id=id, genrename=gname, count=count, albums=albs)
