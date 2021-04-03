@@ -54,7 +54,7 @@ def album(id):
 	result = db.session.execute(sql, {"id":id})
 	albumname = result.fetchone()[0]
 	
-	sql = "SELECT artist_name FROM artists, albums WHERE albums.id=:id"
+	sql = "SELECT artist_name FROM artists, albums WHERE albums.id=:id AND albums.artist_id = artists.id"
 	result = db.session.execute(sql, {"id":id})
 	artistname = result.fetchone()[0]
 	
