@@ -57,7 +57,6 @@ def album(id):
 	sql = "SELECT artist_name FROM artists, albums WHERE albums.id=:id AND albums.artist_id = artists.id"
 	result = db.session.execute(sql, {"id":id})
 	artistname = result.fetchone()[0]
-	
 	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list)
 
 @app.route("/genre/<int:id>")
@@ -73,10 +72,11 @@ def genre_albums(id):
 	gname = result.fetchone()[0]
 	return render_template("genre.html", id=id, genrename=gname, count=count, albums=albs)
 	
-	
-	
-	
-	
+@app.route("/addalbum")
+def add_album_site(): 
+	result = db.session.execute("SELECT genres.genre_name FROM genres")
+	available_genres = result.fetchall()
+	return render_template("newalbum.html", genres=available_genres)
 	
 	
 	

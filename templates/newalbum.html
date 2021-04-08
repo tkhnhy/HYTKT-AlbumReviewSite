@@ -1,0 +1,24 @@
+<form action="/createalbum" method="POST">
+	<span>Album name: </span>
+	<input type="text" name="album_name"></p>
+	<span>Artist name: </span>
+	<input type="text" name="artist_name"></p>
+	<span>Select album genre: </span>
+	<select name="alb_genre" id="alb_genres">
+		{% for genre in genres %}
+		<option value="{{ genre[0] }}">{{ genre[0] }}</p>
+		{% endfor %}
+	</select>
+	<br>
+	<br>
+	<input type="submit" value="Add album">
+</form>
+<br>
+<br>
+<p>Don't see a correct genre for this album? You can add a new one <a href="genre/add">here</a></p> 
+<br>
+<p>You can add songs to the album later by going to the albums' page</p> 
+<br>
+<br>
+<br>
+<a href="/">home</a>
