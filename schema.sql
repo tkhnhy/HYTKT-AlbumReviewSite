@@ -3,7 +3,6 @@ CREATE TABLE albums (
   album_name TEXT,
   artist_id INTEGER,
   album_genre_id INTEGER,
-  num_of_songs INTEGER,
 );
 
 CREATE TABLE songs (

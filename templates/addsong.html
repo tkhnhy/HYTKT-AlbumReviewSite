@@ -1,0 +1,11 @@
+<form action="/create_song" method="POST">
+<p>What is the name of the song?<br>
+<input type="text" name="song_name"></p>
+<p>Song lenght in seconds (s)</p>
+<input type="number" name="song_length"></p>
+<input type="number" name="album_id" value={{ id }} hidden>
+<input type="submit" value="Add song">
+</form>
+<br>
+<br>
+<a href="/">home</a>

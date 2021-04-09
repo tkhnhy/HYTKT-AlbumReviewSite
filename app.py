@@ -77,17 +77,48 @@ def add_album_site():
 	result = db.session.execute("SELECT genres.genre_name FROM genres")
 	available_genres = result.fetchall()
 	return render_template("newalbum.html", genres=available_genres)
-	
-	
-	
-	
-	
 
+@app.route("/createalbum", methods=["POST"])
+def create_album():
+	album_name_new = request.form["album_name"]
+	artist_name_text = request.form["artist_name"]
+	album_genre_text = request.form["alb_genre"]
 	
+	result = db.session.execute(f"SELECT artists.id FROM artists WHERE artists.artist_name='{artist_name_text}'")
+	is_artist = result.fetchone()
+	if is_artist == None:
+		sql = f"INSERT INTO artists (artist_name) VALUES ('{artist_name_text}')"
+		result = db.session.execute(sql)
 	
+	result = db.session.execute(f"SELECT artists.id FROM artists WHERE artists.artist_name='{artist_name_text}'")
+	artist_id_new = result.fetchone()
 	
-	
-	
+	result = db.session.execute(f"SELECT genres.id FROM genres WHERE genres.genre_name='{album_genre_text}'")
+	genre_id_new = result.fetchone()
+	#Artist name and genre need to be referenced to database and get their id's
+	#(in artist name case create an artist if none exist)
+	#fresh_album_id = db.session.execute(f"SELECT albums.id FROM albums WHERE albums.album_name={album_name}")
+	#return redirect(f"/album/{fresh_album_id}")
+	sql = f"INSERT INTO albums (album_name,artist_id,album_genre_id) VALUES ('{album_name_new}',{artist_id_new[0]},{genre_id_new[0]})"
+	result = db.session.execute(sql)
+	db.session.commit()
+	result = db.session.execute(f"SELECT albums.id FROM albums WHERE albums.album_name='{album_name_new}'")
+	id = result.fetchone()
+	return redirect(f"/album/{id[0]}")
+
+@app.route("/album/<int:id>/add_song")
+def addsong(id):	
+	return render_template("addsong.html", id=id)
+
+@app.route("/create_song", methods=["POST"])
+def create_song():
+	song_name_new = request.form["song_name"]
+	song_length_new = request.form["song_length"]
+	album_id_new = request.form["album_id"]
+	sql = f"INSERT INTO songs (album_id,song_name,song_length_seconds) VALUES ({album_id_new},'{song_name_new}',{song_length_new})"
+	result = db.session.execute(sql)
+	db.session.commit()
+	return redirect(f"/album/{album_id_new}")
 	
 	
 	
