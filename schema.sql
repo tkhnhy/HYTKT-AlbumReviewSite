@@ -19,12 +19,12 @@ CREATE TABLE genres (
 
 CREATE TABLE artists (
   id SERIAL PRIMARY KEY,
-  artist_name TEXT
+  artist_name TEXT UNIQUE
 );
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  user_name TEXT,
+  user_name VARCHAR (50) UNIQUE,
   user_password TEXT,
   user_role INTEGER
 );
@@ -33,5 +33,6 @@ CREATE TABLE reviews (
   id SERIAL PRIMARY KEY,
   user_id INTEGER,
   album_id INTEGER,
+  review_date DATE NOT NULL,
   content TEXT
 );

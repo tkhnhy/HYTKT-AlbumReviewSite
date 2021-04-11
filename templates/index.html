@@ -1,4 +1,13 @@
 <h1> Welcome! </h1>
+{% if session.username %}
+<p>Logged in as {{ session.username }}</p>
+<br>
+<a href="/logout">Log out</a>
+{% else %}
+<p>Not logged in. <a href="/loginpage">Log in here</a></p>
+{% endif %}
+<br>
+<br>
 <br>
 <a href = "/all">Show all albums</a>
 <br>

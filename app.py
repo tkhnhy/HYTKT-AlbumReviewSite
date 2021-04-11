@@ -1,12 +1,20 @@
 from flask import Flask
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
+from werkzeug.security import check_password_hash, generate_password_hash
 import useful_function as uf
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
+app.secret_key = getenv("SECRET_KEY")
 db = SQLAlchemy(app)
+
+
+#TODO
+#Add ratings to albums, needs just a new sql table with album_id, user_id and rating 1-10
+#Add login functionality
+#Add reviews
 
 @app.route("/")
 def index():
@@ -16,7 +24,9 @@ def index():
 def all_list():
 	result = db.session.execute("SELECT COUNT(*) FROM albums")
 	count = result.fetchone()[0]
-	result = db.session.execute("SELECT albums.id, album_name, artist_name, genre_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id = genres.id;")
+	sql = "SELECT albums.id, album_name, artist_name, genre_name FROM albums, artists, genres "\
+		  "WHERE artists.id = albums.artist_id AND albums.album_genre_id = genres.id;"
+	result = db.session.execute(sql)
 	albs = result.fetchall()
 	return render_template("allalbums.html", count=count, albums=albs)
 
@@ -61,7 +71,8 @@ def album(id):
 
 @app.route("/genre/<int:id>")
 def genre_albums(id):
-	sql = "SELECT albums.id, album_name, artist_name FROM albums, artists, genres WHERE artists.id = albums.artist_id AND albums.album_genre_id=:id AND genres.id=:id;"
+	sql = "SELECT albums.id, album_name, artist_name FROM albums, artists, genres " \
+          "WHERE artists.id = albums.artist_id AND albums.album_genre_id=:id AND genres.id=:id;"
 	result = db.session.execute(sql, {"id":id})
 	albs = result.fetchall()
 	sql = "SELECT COUNT(albums.id) FROM albums, genres WHERE genres.id =:id AND albums.album_genre_id=:id"
@@ -95,10 +106,6 @@ def create_album():
 	
 	result = db.session.execute(f"SELECT genres.id FROM genres WHERE genres.genre_name='{album_genre_text}'")
 	genre_id_new = result.fetchone()
-	#Artist name and genre need to be referenced to database and get their id's
-	#(in artist name case create an artist if none exist)
-	#fresh_album_id = db.session.execute(f"SELECT albums.id FROM albums WHERE albums.album_name={album_name}")
-	#return redirect(f"/album/{fresh_album_id}")
 	sql = f"INSERT INTO albums (album_name,artist_id,album_genre_id) VALUES ('{album_name_new}',{artist_id_new[0]},{genre_id_new[0]})"
 	result = db.session.execute(sql)
 	db.session.commit()
@@ -120,7 +127,54 @@ def create_song():
 	db.session.commit()
 	return redirect(f"/album/{album_id_new}")
 	
+@app.route("/loginpage")
+def login_page():
+	return render_template("loginpage.html")
+
+@app.route("/login", methods=["POST"])
+def login():
+	username = request.form["username"]
+	password = request.form["password"]
+	sql = "SELECT user_password FROM users WHERE username=:username"
+	result = db.session.execute(sql, {"username":username})
+	user = result.fetchone()    
 	
+	if user == None:
+		return redirect("/loginpage")
+	else:
+		hash_value = user[0]
+		if check_password_hash(hash_value,password):
+			session["username"] = username
+			return redirect("/")
+		else:
+			return redirect("/loginpage")
+
+@app.route("/logout")
+def logout():
+    del session["username"]
+    return redirect("/")
+
+@app.route("/registerpage")
+def register_page():
+	return render_template("/registerpage.html")
 	
-	
-	
+@app.route("/register", methods=["POST"])
+def register():
+	username = request.form["username"]
+	password = request.form["password"]
+	sql = f"SELECT COUNT(*) FROM users WHERE users.username='{username}'"
+	result = db.session.execute(sql)
+	is_user = result.fetchall()
+	if is_user[0][0] > 0:
+		session["taken"] = True
+		return redirect("/registerpage")
+	else:
+		basic_role = 1
+		hash_value = generate_password_hash(password)
+		sql = "INSERT INTO users (username, user_password, user_role) VALUES (:username,:password,:role)"
+		db.session.execute(sql, {"username":username,"password":hash_value,"role":basic_role})
+		db.session.commit()
+		return redirect("/loginpage")
+
+
+
