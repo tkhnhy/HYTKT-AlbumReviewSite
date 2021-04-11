@@ -12,3 +12,13 @@
 * USers can also 'like' other users reviews
 * Users with special status can add albums to the database
 * Special status users can also remove regular users reviews
+
+### Whats done so far 11/4
+
+* Login and register feature (Not used for anything yet)
+* Albums, genres and songs can be added, but not removed or edited - not restricted by user role yet.
+* All albums can be browsed and the can be sorted by genre
+
+## Heroku link
+https://tkhnhy-albumreview.herokuapp.com/
+
