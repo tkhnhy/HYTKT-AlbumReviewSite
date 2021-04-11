@@ -24,7 +24,7 @@ CREATE TABLE songs (
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  user_name VARCHAR (50) UNIQUE,
+  username VARCHAR (50) UNIQUE,
   user_password TEXT,
   user_role INTEGER
 );
