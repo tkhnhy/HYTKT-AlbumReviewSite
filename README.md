@@ -9,7 +9,7 @@
 * Users can sort albums based on their rating
 * The album page contains a list of the songs of that album
 * Users can leave their own reviews on albums or remove them
-* USers can also 'like' other users reviews
+* Users can also 'like' other users reviews
 * Users with special status can add albums to the database
 * Special status users can also remove regular users reviews
 

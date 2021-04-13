@@ -105,10 +105,11 @@ def create_album():
 	
 	result = db.session.execute(f"SELECT genres.id FROM genres WHERE genres.genre_name='{album_genre_text}'")
 	genre_id_new = result.fetchone()
-	sql = f"INSERT INTO albums (album_name,artist_id,album_genre_id) VALUES ('{album_name_new}',{artist_id_new[0]},{genre_id_new[0]})"
-	result = db.session.execute(sql)
+	sql = "INSERT INTO albums (album_name,artist_id,album_genre_id) VALUES (:album_name,:artist_id,:genre_id)"
+	result = db.session.execute(sql, {"album_name":album_name_new,"artist_id":artist_id_new[0],"genre_id":genre_id_new[0]})
 	db.session.commit()
-	result = db.session.execute(f"SELECT albums.id FROM albums WHERE albums.album_name='{album_name_new}'")
+	sql = "SELECT albums.id FROM albums WHERE albums.album_name=:album_name"
+	result = db.session.execute(sql, {"album_name":album_name_new})
 	id = result.fetchone()
 	return redirect(f"/album/{id[0]}")
 
@@ -121,8 +122,8 @@ def create_song():
 	song_name_new = request.form["song_name"]
 	song_length_new = request.form["song_length"]
 	album_id_new = request.form["album_id"]
-	sql = f"INSERT INTO songs (album_id,song_name,song_length_seconds) VALUES ({album_id_new},'{song_name_new}',{song_length_new})"
-	result = db.session.execute(sql)
+	sql = "INSERT INTO songs (album_id,song_name,song_length_seconds) VALUES (:album_id,:song_name,:song_length)"
+	result = db.session.execute(sql, {"album_id":album_id_new,"song_name":song_name_new,"song_length":song_length_new})
 	db.session.commit()
 	return redirect(f"/album/{album_id_new}")
 	
