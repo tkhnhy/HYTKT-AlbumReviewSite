@@ -150,14 +150,14 @@ def login():
 	user = result.fetchone()    
 	
 	if user == None:
-		return notification("Invalid username or password")
+		pass
 	else:
 		hash_value = user[0]
 		if check_password_hash(hash_value,password):
 			session["username"] = username
 			return redirect("/")
 		else:
-			return notification("Invalid username or password")
+			pass
 
 @app.route("/logout")
 def logout():
@@ -173,16 +173,16 @@ def register():
 	username = request.form["username"]
 	password = request.form["password"]
 	if len(username) <= 0:
-		return notification("Username has to be filled")
+		pass
 	else:
 		if len(password) <= 6:
-			return notification("Password has to be at leaset 6 characters long")
+			pass
 		else:
 			sql = "SELECT COUNT(*) FROM users WHERE users.username=:username"
 			result = db.session.execute(sql, {"username":username})
 			is_user = result.fetchall()
 			if is_user[0][0] > 0:
-				return notification("This username is taken")
+				pass
 			else:
 				basic_role = 1
 				hash_value = generate_password_hash(password)
