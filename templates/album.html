@@ -7,7 +7,22 @@
 <hr>
 {% endfor %}
 <br>
+{% if session.username %}
 <a href="/album/{{ id }}/add_song">Add a new song to album</a>
+{% endif %}
+<br>
+<br>
+<h3>Reviews:</h3>
+{% if session.username %}
+<form action="/addreview" method="POST">
+<p>Leave a review:</p>
+<input type="text" name="review_content"></p>
+<input type="submit" value="Submit">
+</form>
+{% else %}
+<p>Login to leave a review or edit the album</p>
+{% endif %}
+
 <br>
 <br>
 <a href="/">home</a>

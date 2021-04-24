@@ -42,6 +42,8 @@ def add_genre_site():
 @app.route("/creategenre", methods=["POST"])
 def create_genre():
 	genre_name = request.form["genre_name"]
+	if len(genre_name) <= 0:
+		return redirect("/genre/add")
 	sql = "INSERT INTO genres (genre_name) VALUES (:genre_name)"
 	result = db.session.execute(sql, {"genre_name":genre_name})
 	db.session.commit()
@@ -94,11 +96,15 @@ def create_album():
 	artist_name_text = request.form["artist_name"]
 	album_genre_text = request.form["alb_genre"]
 	
-	result = db.session.execute(f"SELECT artists.id FROM artists WHERE artists.artist_name='{artist_name_text}'")
+	if len(album_name_new) <= 0 or len(artist_name_text) <= 0:
+		return redirect("/addalbum")
+		
+	sql = ("SELECT artists.id FROM artists WHERE artists.artist_name=:artist_name_text")
+	result = db.session.execute(sql, {"artist_name_text":artist_name_text})
 	is_artist = result.fetchone()
 	if is_artist == None:
-		sql = f"INSERT INTO artists (artist_name) VALUES ('{artist_name_text}')"
-		result = db.session.execute(sql)
+		sql = "INSERT INTO artists (artist_name) VALUES (:artist_name_text)"
+		result = db.session.execute(sql, {"artist_name_text":artist_name_text})
 	
 	result = db.session.execute(f"SELECT artists.id FROM artists WHERE artists.artist_name='{artist_name_text}'")
 	artist_id_new = result.fetchone()
@@ -121,6 +127,10 @@ def addsong(id):
 def create_song():
 	song_name_new = request.form["song_name"]
 	song_length_new = request.form["song_length"]
+	
+	if len(song_name_new) <= 0 or song_length_new <= 0:
+		return redirect(f"/album/{album_id_new}/add_song")
+	
 	album_id_new = request.form["album_id"]
 	sql = "INSERT INTO songs (album_id,song_name,song_length_seconds) VALUES (:album_id,:song_name,:song_length)"
 	result = db.session.execute(sql, {"album_id":album_id_new,"song_name":song_name_new,"song_length":song_length_new})
@@ -140,14 +150,14 @@ def login():
 	user = result.fetchone()    
 	
 	if user == None:
-		return redirect("/loginpage")
+		return notification("Invalid username or password")
 	else:
 		hash_value = user[0]
 		if check_password_hash(hash_value,password):
 			session["username"] = username
 			return redirect("/")
 		else:
-			return redirect("/loginpage")
+			return notification("Invalid username or password")
 
 @app.route("/logout")
 def logout():
@@ -162,19 +172,24 @@ def register_page():
 def register():
 	username = request.form["username"]
 	password = request.form["password"]
-	sql = f"SELECT COUNT(*) FROM users WHERE users.username='{username}'"
-	result = db.session.execute(sql)
-	is_user = result.fetchall()
-	if is_user[0][0] > 0:
-		session["taken"] = True
-		return redirect("/registerpage")
+	if len(username) <= 0:
+		return notification("Username has to be filled")
 	else:
-		basic_role = 1
-		hash_value = generate_password_hash(password)
-		sql = "INSERT INTO users (username, user_password, user_role) VALUES (:username,:password,:role)"
-		db.session.execute(sql, {"username":username,"password":hash_value,"role":basic_role})
-		db.session.commit()
-		return redirect("/loginpage")
+		if len(password) <= 6:
+			return notification("Password has to be at leaset 6 characters long")
+		else:
+			sql = "SELECT COUNT(*) FROM users WHERE users.username=:username"
+			result = db.session.execute(sql, {"username":username})
+			is_user = result.fetchall()
+			if is_user[0][0] > 0:
+				return notification("This username is taken")
+			else:
+				basic_role = 1
+				hash_value = generate_password_hash(password)
+				sql = "INSERT INTO users (username, user_password, user_role) VALUES (:username,:password,:role)"
+				db.session.execute(sql, {"username":username,"password":hash_value,"role":basic_role})
+				db.session.commit()
+				return redirect("/loginpage")
 
 
 
