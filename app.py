@@ -15,6 +15,8 @@ db = SQLAlchemy(app)
 #Add login functionality
 #Add reviews
 
+session["notification"] = ""
+
 @app.route("/")
 def index():
 	return render_template("index.html")
@@ -166,23 +168,28 @@ def logout():
 
 @app.route("/registerpage")
 def register_page():
-	return render_template("/registerpage.html")
+	message = session["notification"]
+	session["notification"] = ""
+	return render_template("/registerpage.html", message=message)
 	
 @app.route("/register", methods=["POST"])
 def register():
 	username = request.form["username"]
 	password = request.form["password"]
 	if len(username) <= 0:
-		return render_template("/registerpage.html", message="Username must be filled")
+		session["notification"] = "Username form cannot be empty!"
+		return redirect("/registerpage") 
 	else:
 		if len(password) <= 6:
-			return render_template("/registerpage.html", message="Password has to be over 6 characters")
+			session["notification"] = "Password has to be over 6 characters!"
+			return redirect("/registerpage") 
 		else:
 			sql = "SELECT COUNT(*) FROM users WHERE users.username=:username"
 			result = db.session.execute(sql, {"username":username})
 			is_user = result.fetchall()
 			if is_user[0][0] > 0:
-				return render_template("/registerpage.html", message="This username is already taken")
+				session["notification"] = "This username is already taken"
+				return redirect("/registerpage") 
 			else:
 				basic_role = 1
 				hash_value = generate_password_hash(password)
