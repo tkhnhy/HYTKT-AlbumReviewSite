@@ -173,16 +173,16 @@ def register():
 	username = request.form["username"]
 	password = request.form["password"]
 	if len(username) <= 0:
-		pass
+		return render_template("/registerpage.html", message="Username must be filled")
 	else:
 		if len(password) <= 6:
-			pass
+			return render_template("/registerpage.html", message="Password has to be over 6 characters")
 		else:
 			sql = "SELECT COUNT(*) FROM users WHERE users.username=:username"
 			result = db.session.execute(sql, {"username":username})
 			is_user = result.fetchall()
 			if is_user[0][0] > 0:
-				pass
+				return render_template("/registerpage.html", message="This username is already taken")
 			else:
 				basic_role = 1
 				hash_value = generate_password_hash(password)
