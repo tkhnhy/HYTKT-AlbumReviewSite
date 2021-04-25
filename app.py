@@ -85,7 +85,8 @@ def album(id):
 	average = 0
 	for i in ratings:
 		average += int(i[0])
-	average = average/len(ratings)
+	if len(ratings) != 0:
+		average = average/len(ratings)
 	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list,review_content=review_content,message=message, avg_rating=average)
 
 @app.route("/genre/<int:id>")
