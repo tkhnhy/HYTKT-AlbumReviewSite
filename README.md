@@ -13,6 +13,14 @@
 * Users with special status can add albums to the database
 * Special status users can also remove regular users reviews
 
+### Update 25/4
+
+* Login and register feature now functional
+* Albums, genres and songs can be added, genres and albums can be removed. This functionality is only availabe to admins
+* All albums can be browsed and the can be sorted by genre
+* Albums, artists or genres can be searched for with a search tool
+* Users can rate an album or leave a text review. An admin can remove text reviews.
+
 ### Whats done so far 11/4
 
 * Login and register feature (Not used for anything yet)
