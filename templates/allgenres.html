@@ -6,5 +6,7 @@
 <hr>
 {% endfor %}
 <br>
+{% if session.admin %}
 <p>Add a new genre <a href="genre/add">here</a></p>
+{% endif %}
 <a href="/">home</a>

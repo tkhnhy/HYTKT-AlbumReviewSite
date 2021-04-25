@@ -11,11 +11,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL").replace("://", "q
 app.secret_key = getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 
-#TODO
-#Add ratings to albums, needs just a new sql table with album_id, user_id and rating 1-10
-#Add login functionality
-#Add reviews
-
 @app.route("/")
 def index():
 	return render_template("index.html")
@@ -56,6 +51,9 @@ def create_genre():
 
 @app.route("/album/<int:id>")
 def album(id):
+	message = session.get("notification")
+	session["notification"] = ""
+	
 	sql = "SELECT song_name, song_length_seconds FROM songs,albums WHERE albums.id = songs.album_id AND albums.id=:id ORDER BY songs.id;"
 	result = db.session.execute(sql, {"id":id})
 	alb_content = result.fetchall()
@@ -74,13 +72,21 @@ def album(id):
 	result = db.session.execute(sql, {"id":id})
 	artistname = result.fetchone()[0]
 	
-	sql = "SELECT reviews.content, reviews.review_date, users.username FROM reviews, users WHERE reviews.album_id=:id AND users.id=reviews.user_id"
+	sql = "SELECT reviews.content, reviews.review_date, users.username, reviews.id FROM reviews, users WHERE reviews.album_id=:id AND users.id=reviews.user_id"
 	result = db.session.execute(sql, {"id":id})
 	review_content = result.fetchall()
 	
 	if len(review_content) == 0:
 		review_content = ["Seems like there are no reviews yet."]
-	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list,review_content=review_content)
+		
+	sql = "SELECT rating FROM ratings WHERE ratings.album_id=:id;"
+	result = db.session.execute(sql, {"id":id})
+	ratings = result.fetchall()
+	average = 0
+	for i in ratings:
+		average += int(i[0])
+	average = average/len(ratings)
+	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list,review_content=review_content,message=message, avg_rating=average)
 
 @app.route("/genre/<int:id>")
 def genre_albums(id):
@@ -171,6 +177,9 @@ def login_page():
 
 @app.route("/login", methods=["POST"])
 def login():
+	if session.get("admin") == "Admin":
+		del session["admin"]
+		
 	username = request.form["username"]
 	password = request.form["password"]
 	sql = "SELECT user_password FROM users WHERE username=:username"
@@ -184,9 +193,11 @@ def login():
 		hash_value = user[0]
 		if check_password_hash(hash_value,password):
 			session["username"] = username
-			#sql = "SELECT user_role FROM users WHERE users.username=:username"
-			#result = db.session.execute(sql, {"username":username})
-			#session["user_role"] = result.fetchone()
+			sql = "SELECT user_role FROM users WHERE users.username=:username"
+			result = db.session.execute(sql, {"username":username})
+			role = result.fetchone()
+			if role[0] == 2:
+				session["admin"] = "Admin"
 			return redirect("/")
 		else:
 			session["notification"] = "Username or password is incorrect"
@@ -194,8 +205,10 @@ def login():
 
 @app.route("/logout")
 def logout():
-    del session["username"]
-    return redirect("/")
+	del session["username"]
+	if session.get("admin") == "Admin":
+		del session["admin"]
+	return redirect("/")
 
 @app.route("/registerpage")
 def register_page():
@@ -242,3 +255,74 @@ def searchresults():
 	albs = result.fetchall()
 	return render_template("searchresults.html",keyword=query, albums=albs)
 
+@app.route("/deletealbum", methods=["POST"])
+def deletealbum():
+	album_id = request.form["album_id"]
+	sql = "DELETE from albums WHERE id=:id;"
+	result = db.session.execute(sql, {"id":album_id})
+	db.session.commit()
+	return redirect("/all")
+	
+@app.route("/deletegenre", methods=["POST"])
+def deletegenre():
+	genre_id = request.form["genre_id"]
+	sql = "DELETE from genres WHERE id=:id;"
+	result = db.session.execute(sql, {"id":genre_id})
+	db.session.commit()
+	return redirect("/genre")
+	
+@app.route("/addreview", methods=["POST"])
+def addreview():
+	album_id = request.form["album_id"]
+	content = request.form["review_content"]
+	username = session.get("username")
+	sql = "SELECT id FROM users WHERE username=:username;"
+	result = db.session.execute(sql, {"username":username})
+	user_id = result.fetchone()
+	
+	if len(content) == 0 or len(content) > 9999:
+		notification = "Review form cannot be empty or over 9999 characters"
+		session["notification"] = notification
+		return redirect(f"/album/{album_id}")
+	sql = "SELECT COUNT(id) FROM reviews WHERE album_id=:album_id AND user_id=:user_id;"
+	result = db.session.execute(sql, {"album_id":album_id,"user_id":user_id[0]})
+	has_reviewed = result.fetchone()
+	if has_reviewed[0] == 0:
+		sql = "INSERT INTO reviews (user_id, album_id, review_date, content) "\
+			  "VALUES (:user_id, :album_id, NOW(), :content);"
+		result = db.session.execute(sql, {"user_id":user_id[0],"album_id":album_id,"content":content})
+		db.session.commit()
+		return redirect(f"/album/{album_id}")
+	else:
+		return redirect(f"/album/{album_id}")
+
+@app.route("/deletereview", methods=["POST"])
+def deletereview():
+	review_id = request.form["review_id"]
+	album_id = request.form["album_id"]
+	sql = "DELETE from reviews WHERE id=:id;"
+	result = db.session.execute(sql, {"id":review_id})
+	db.session.commit()
+	return redirect(f"/album/{album_id}")
+
+@app.route("/addrating", methods=["POST"])
+def addrating():
+	username = session.get("username")
+	sql = "SELECT id FROM users WHERE username=:username;"
+	result = db.session.execute(sql, {"username":username})
+	user_id = result.fetchone()
+	user_id = user_id[0]
+	
+	rating = request.form["rating"]
+	album_id = request.form["album_id"]
+	
+	sql = "SELECT COUNT(id) FROM ratings WHERE album_id=:album_id AND user_id=:user_id;"
+	result = db.session.execute(sql, {"album_id":album_id,"user_id":user_id})
+	has_rated = result.fetchone()
+	if has_rated[0] == 0:
+		sql = "INSERT INTO ratings (user_id, album_id, rating) VALUES (:user_id,:album_id,:rating);"
+		result = db.session.execute(sql, {"album_id":album_id,"user_id":user_id,"rating":rating})
+		db.session.commit()
+		return redirect(f"/album/{album_id}")
+	else:
+		return redirect(f"/album/{album_id}")

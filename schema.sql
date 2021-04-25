@@ -11,13 +11,13 @@ CREATE TABLE genres (
 CREATE TABLE albums (
   id SERIAL PRIMARY KEY,
   album_name TEXT,
-  artist_id INTEGER REFERENCES artists,
-  album_genre_id INTEGER REFERENCES genres
+  artist_id INTEGER REFERENCES artists ON DELETE CASCADE,
+  album_genre_id INTEGER REFERENCES genres ON DELETE CASCADE
 );
 
 CREATE TABLE songs (
   id SERIAL PRIMARY KEY,
-  album_id INTEGER REFERENCES albums,
+  album_id INTEGER REFERENCES albums ON DELETE CASCADE,
   song_name TEXT,
   song_length_seconds INTEGER
 );
@@ -31,15 +31,15 @@ CREATE TABLE users (
 
 CREATE TABLE reviews (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users,
-  album_id INTEGER REFERENCES albums,
+  user_id INTEGER REFERENCES users ON DELETE CASCADE,
+  album_id INTEGER REFERENCES albums ON DELETE CASCADE,
   review_date DATE NOT NULL,
   content TEXT
 );
 
 CREATE TABLE ratings (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users,
-  album_id INTEGER REFERENCES albums,
+  user_id INTEGER REFERENCES users ON DELETE CASCADE,
+  album_id INTEGER REFERENCES albums ON DELETE CASCADE,
   rating INTEGER
 );

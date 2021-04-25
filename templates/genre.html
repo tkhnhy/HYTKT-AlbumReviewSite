@@ -6,4 +6,10 @@
 <hr>
 {% endfor %}
 <br>
+{% if session.admin %}
+<form action="/deletegenre" method="POST">
+	<input type="number" name="genre_id" value={{ id }} hidden>
+	<input type="submit" value="Delete this genre">
+</form>
+{% endif %}
 <a href="/">home</a>

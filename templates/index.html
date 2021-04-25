@@ -1,4 +1,7 @@
 <h1> Welcome! </h1>
+{% if session.admin %}
+<p>You are an admin</p>
+{% endif %}
 {% if session.username %}
 <p>Logged in as {{ session.username }}</p>
 <br>
@@ -20,4 +23,6 @@
 <br>
 <br>
 <br>
+{% if session.admin %}
 <h3><a href = "/addalbum">Add a new album</a></h3>
+{% endif %}
