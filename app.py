@@ -76,8 +76,8 @@ def album(id):
 	result = db.session.execute(sql, {"id":id})
 	review_content = result.fetchall()
 	
-	if len(review_content) == 0:
-		review_content = ["Seems like there are no reviews yet."]
+	#if len(review_content) == 0:
+		#review_content = ["Seems like there are no reviews yet."]
 		
 	sql = "SELECT rating FROM ratings WHERE ratings.album_id=:id;"
 	result = db.session.execute(sql, {"id":id})
