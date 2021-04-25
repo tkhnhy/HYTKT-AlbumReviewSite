@@ -31,6 +31,6 @@
 https://tkhnhy-albumreview.herokuapp.com/
 
 Note: 
-If you want to try out admin privileges log in with these creditentials:
-Username: admin
+If you want to try out admin privileges log in with these creditentials:  
+Username: admin  
 Password: adminpassword
