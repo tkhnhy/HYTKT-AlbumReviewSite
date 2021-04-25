@@ -73,7 +73,14 @@ def album(id):
 	sql = "SELECT artist_name FROM artists, albums WHERE albums.id=:id AND albums.artist_id = artists.id"
 	result = db.session.execute(sql, {"id":id})
 	artistname = result.fetchone()[0]
-	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list)
+	
+	sql = "SELECT reviews.content, reviews.review_date, users.username FROM reviews, users WHERE reviews.album_id=:id AND users.id=reviews.user_id"
+	result = db.session.execute(sql, {"id":id})
+	review_content = result.fetchall()
+	
+	if len(review_content) == 0:
+		review_content = ["Seems like there are no reviews yet."]
+	return render_template("album.html", id=id,alb_name=albumname, art_name=artistname, alb_con=con_list,review_content=review_content)
 
 @app.route("/genre/<int:id>")
 def genre_albums(id):
@@ -177,6 +184,9 @@ def login():
 		hash_value = user[0]
 		if check_password_hash(hash_value,password):
 			session["username"] = username
+			#sql = "SELECT user_role FROM users WHERE users.username=:username"
+			#result = db.session.execute(sql, {"username":username})
+			#session["user_role"] = result.fetchone()
 			return redirect("/")
 		else:
 			session["notification"] = "Username or password is incorrect"
@@ -222,5 +232,13 @@ def register():
 				db.session.commit()
 				return redirect("/loginpage")
 
-
+@app.route("/searchresults", methods=["GET"])
+def searchresults():
+	query = request.args["query"]
+	sql = "SELECT albums.id, album_name, artist_name, genre_name FROM albums, artists, genres "\
+		  "WHERE artists.id = albums.artist_id AND albums.album_genre_id = genres.id "\
+		  "AND (albums.album_name ILIKE :query OR artists.artist_name ILIKE :query OR genres.genre_name ILIKE :query);"
+	result = db.session.execute(sql, {"query":"%"+query+"%"})
+	albs = result.fetchall()
+	return render_template("searchresults.html",keyword=query, albums=albs)
 

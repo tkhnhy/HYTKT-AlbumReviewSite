@@ -10,19 +10,44 @@
 {% if session.username %}
 <a href="/album/{{ id }}/add_song">Add a new song to album</a>
 {% endif %}
+
 <br>
 <br>
+
+{% if session.username %}
+<form action="/addrating" method="POST">
+	<p>What would you rate this album?</p>
+	<select name="rating" id="rating">
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+		<option value="6">6</option>
+		<option value="7">7</option>
+		<option value="8">8</option>
+		<option value="9">9</option>
+		<option value="10">10</option>
+	</select>
+	<input type="submit" value="Rate">
+</form>
+{% endif %}
+
 <h3>Reviews:</h3>
 {% if session.username %}
 <form action="/addreview" method="POST">
-<p>Leave a review:</p>
-<input type="text" name="review_content"></p>
-<input type="submit" value="Submit">
+	<p>Leave a review:</p>
+	<textarea name="review_content" rows="8" cols="50"></textarea></p>
+	<input type="submit" value="Submit">
 </form>
+
 {% else %}
 <p>Login to leave a review or edit the album</p>
 {% endif %}
-
+<hr>
+{% for review in review_content %}
+{{ review }}
+{% endfor %}
 <br>
 <br>
 <a href="/">home</a>

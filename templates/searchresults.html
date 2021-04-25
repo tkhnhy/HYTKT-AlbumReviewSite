@@ -1,0 +1,6 @@
+<h2>Search results for: {{ keyword }}</h2>
+<hr>
+{% for album in albums %}
+<a href="/album/{{ album[0] }}">{{ album[1] }} - {{ album[2] }} [{{ album[3] }}]</a>
+<hr>
+{% endfor %}
